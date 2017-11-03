@@ -4,7 +4,7 @@
 
 y = 1
 e = 0.001
-MAX_ITERS = 10
+MAX_ITERS = 1000
 
 # input - an MDP with states s (2D array)
 #       - actions A (N, NE, E, SE, S, SW, W, NW, stay)
@@ -104,6 +104,7 @@ def possibleActions(s, case):
 			# valid only when location is in bounds
 			if(isValid(sp)):
 				A.append(direction)
+			'''
 			# if wind blew us out of map, push us back onto map
 			elif(wind == True):
 				sp = ( (sp[0] + 1), sp[1] )
@@ -113,7 +114,7 @@ def possibleActions(s, case):
 					sp = ( (sp[0] + 1), sp[1] )
 					if(isValid(sp)):
 						A.append(direction)
-
+			'''
 	return A
 
 # Reward Function
