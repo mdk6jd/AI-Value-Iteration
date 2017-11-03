@@ -4,7 +4,7 @@
 
 y = 1
 e = 0.001
-MAX_ITERS = 1000
+MAX_ITERS = 10
 
 # input - an MDP with states s (2D array)
 #       - actions A (N, NE, E, SE, S, SW, W, NW, stay)
@@ -29,13 +29,17 @@ def valueIteration(U, case):
 				# find all the states that can result from all possible actions at current state
 				A = possibleActions(s, case)
 				# Up[i][j] = R(s) + y*max(sum(Pr(sp, s, A)*U[ip][jp]))
-				maxValue = 0
+				maxValue = None
 				for a in A:
 					sp = ( (a[0] + s[0]), (a[1] + s[1]) )
 					probability = Pr(sp, s, a)*U[sp[0]][sp[1]]
-					maxValue = max(maxValue, probability)
+					if(maxValue == None):
+						maxValue = probability
+					else:
+						maxValue = max(maxValue, probability)
 				
-				Up[i][j] = R(s) + y*maxValue
+				if(maxValue != None):
+					Up[i][j] = R(s) + y*maxValue
 
 				if (abs(Up[i][j] - U[i][j]) > sigma):
 					sigma = abs(Up[i][j] - U[i][j])
@@ -61,25 +65,54 @@ def possibleActions(s, case):
 		direction = directions[i]
 
 		# case I - no wind, no change
+		if(case == 1):
+			sp = ( (direction[0] + s[0]), (direction[1] + s[1]) )
+			# valid only when location is in bounds
+			inBounds = isValid(sp)
+			if(inBounds):
+				A.append(direction)
 
 		# case II - light wind 
 		# wind blows along columns 3-5 from south to north, row reduced by 1
 		if(case == 2):
-			finalColumn = direction[0] + s[0]
-			if(finalColumn in range(3, 6)):
+			wind = False
+			if(s[1] in range(3, 6)):
+				wind = True
 				direction = ( direction[0] - 1, direction[1] )
+
+			sp = ( (direction[0] + s[0]), (direction[1] + s[1]) )
+			# valid only when location is in bounds
+			if(isValid(sp)):
+				A.append(direction)
+			'''
+			# if wind blew us out of map, push us back onto map
+			elif(wind == True):
+				sp = ( (sp[0] + 1), sp[1] )
+				if(isValid(sp)):
+					A.append(direction)
+			'''
 
 		# case III - strong wind
 		# wind blows along columns 3-5 from south to north, row reduced by 2
 		if(case == 3):
-			finalColumn = direction[0] + s[0]
-			if(finalColumn in range(3, 6)):
+			wind = False
+			if(s[1] in range(3, 6)):
+				wind = True
 				direction = ( direction[0] - 2, direction[1] )
 
-		sp = ( (direction[0] + s[0]), (direction[1] + s[1]) )
-		# valid only when location is in bounds
-		if(0 <= sp[0] and sp[0] < 7 and 0 <= sp[1] and sp[1] < 7):
-			A.append(direction)
+			sp = ( (direction[0] + s[0]), (direction[1] + s[1]) )
+			# valid only when location is in bounds
+			if(isValid(sp)):
+				A.append(direction)
+			# if wind blew us out of map, push us back onto map
+			elif(wind == True):
+				sp = ( (sp[0] + 1), sp[1] )
+				if(isValid(sp)):
+					A.append(direction)
+				else:
+					sp = ( (sp[0] + 1), sp[1] )
+					if(isValid(sp)):
+						A.append(direction)
 
 	return A
 
@@ -90,18 +123,19 @@ def R(s):
 	else:
 		return -1
 
-if __name__ == "__main__":
-	U = [[0 for x in range(7)] for y in range(7)]
-	Up = valueIteration(U, 1)
-	for row in Up:
-		print(row)
-	
-	'''
+# is state on map
+def isValid(s):
+	if(0 <= s[0] and s[0] < 7 and 0 <= s[1] and s[1] < 7):
+		return True
+	else:
+		return False
+
+if __name__ == "__main__":	
 	# call value Iteration function for three cases
-	for i in range(0, 3):
+	for i in range(1, 4):
 		U = [[0 for x in range(7)] for y in range(7)]
 		Up = valueIteration(U, i)
+		print("case " + str(i))
 		for row in Up:
 			print(row)
 		print()
-	'''
