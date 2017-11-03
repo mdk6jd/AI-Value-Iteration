@@ -79,7 +79,7 @@ def possibleActions(s, case):
 
 		sp = ( (direction[0] + s[0]), (direction[1] + s[1]) )
 		# valid only when location is in bounds
-		if(0 <= sp[0] and sp[0] < 7 and 0 <= sp[1] and sp[1] < 7)
+		if(0 <= sp[0] and sp[0] < 7 and 0 <= sp[1] and sp[1] < 7):
 			A.append(direction)
 
 	return A
@@ -88,5 +88,11 @@ def possibleActions(s, case):
 def R(s):
 	if(s[0] == 3 and s[1] == 6):
 		return 0
-	else
+	else:
 		return -1
+
+if __name__ == "__main__":
+	# call value Iteration function for three cases
+	for i in range(0, 4):
+		U = [[0 for x in range(7)] for y in range(7)]
+		print(valueIteration(U, i))
