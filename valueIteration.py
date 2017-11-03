@@ -16,10 +16,10 @@ def valueIteration(U, case):
 	cols = len(U[0])
 	Up = [[0 for x in range(rows)] for y in range(cols)]
 
-	i = 0 
+	iterator = 0
 	sigma = 1
-	while(sigma >= e or i > MAX_ITERS):
-		i += 1
+	while(sigma >= e or iterator < MAX_ITERS):
+		iterator += 1
 		U = Up
 		sigma = 0
 		# for each state s in S 
@@ -34,6 +34,7 @@ def valueIteration(U, case):
 					sp = ( (a[0] + s[0]), (a[1] + s[1]) )
 					probability = Pr(sp, s, a)*U[sp[0]][sp[1]]
 					maxValue = max(maxValue, probability)
+				
 				Up[i][j] = R(s) + y*maxValue
 
 				if (abs(Up[i][j] - U[i][j]) > sigma):
@@ -58,10 +59,8 @@ def possibleActions(s, case):
 	# consider actions in all 9 directions 
 	for i in range(0, len(directions)): 
 		direction = directions[i]
-		
+
 		# case I - no wind, no change
-		if(case == 1):
-			continue
 
 		# case II - light wind 
 		# wind blows along columns 3-5 from south to north, row reduced by 1
@@ -92,7 +91,17 @@ def R(s):
 		return -1
 
 if __name__ == "__main__":
+	U = [[0 for x in range(7)] for y in range(7)]
+	Up = valueIteration(U, 1)
+	for row in Up:
+		print(row)
+	
+	'''
 	# call value Iteration function for three cases
-	for i in range(0, 4):
+	for i in range(0, 3):
 		U = [[0 for x in range(7)] for y in range(7)]
-		print(valueIteration(U, i))
+		Up = valueIteration(U, i)
+		for row in Up:
+			print(row)
+		print()
+	'''
