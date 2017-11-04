@@ -9,8 +9,8 @@ MAX_ITERS = 1000
 # input - an MDP with states s (2D array)
 #       - actions A (N, NE, E, SE, S, SW, W, NW, stay)
 #       - transition model Pr (s′ | s, a)
-# output - the value (utility) of each state s in S 
-def valueIteration(U, case): 
+# output - the value (utility) of each state s in S
+def valueIteration(U, case):
 	# initialize Up, everything equal to 0
 	rows = len(U)
 	cols = len(U[0])
@@ -22,22 +22,45 @@ def valueIteration(U, case):
 		iterator += 1
 		U = Up
 		sigma = 0
-		# for each state s in S 
+		# for each state s in S
 		for i in range(0, rows):
 			for j in range(0, cols):
 				s = (i, j)
 				# find all the states that can result from all possible actions at current state
-				A = possibleActions(s, case)
+				#A = possibleActions(s, case)
+				A = [(-1,-1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1,1)]
 				# Up[i][j] = R(s) + y*max(sum(Pr(sp, s, A)*U[ip][jp]))
 				maxValue = None
 				for a in A:
-					sp = ( (a[0] + s[0]), (a[1] + s[1]) )
-					probability = Pr(sp, s, a)*U[sp[0]][sp[1]]
+					if case == 1:
+						sp = ( (a[0] + s[0]), (a[1] + s[1]) )
+					elif case == 2:
+						if(s[1] in range(3, 6)):
+							sp = ( (a[0] + s[0]-1), (a[1] + s[1]) )
+						else:
+							sp = ( (a[0] + s[0]), (a[1] + s[1]) )
+					elif case == 3:
+						if(s[1] in range(3, 6)):
+							sp = ( (a[0] + s[0]-2), (a[1] + s[1]) )
+						else:
+							sp = ( (a[0] + s[0]), (a[1] + s[1]) )
+
+					#bounds checking
+					if (sp[0] > 6):
+						sp = (6, sp[1])
+					if (sp[0] < 0):
+						sp = (0, sp[1])
+					if (sp[1] > 6):
+						sp = (sp[0], 6)
+					if (sp[1] < 0):
+						sp = (sp[0], 0)
+
+					probability = U[sp[0]][sp[1]]#Pr(sp, s, a)*
 					if(maxValue == None):
 						maxValue = probability
 					else:
 						maxValue = max(maxValue, probability)
-				
+
 				if(maxValue != None):
 					Up[i][j] = R(s) + y*maxValue
 
@@ -53,15 +76,15 @@ def Pr(sp, s, a):
 		return 1
 	else:
 		return 0
-	
+
 # possible actions A at a certain state s
 def possibleActions(s, case):
 	size = 7
 	directions = [(-1,-1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1,1)]
 	A = []
 
-	# consider actions in all 9 directions 
-	for i in range(0, len(directions)): 
+	# consider actions in all 9 directions
+	for i in range(0, len(directions)):
 		direction = directions[i]
 
 		# case I - no wind, no change
@@ -72,7 +95,7 @@ def possibleActions(s, case):
 			if(inBounds):
 				A.append(direction)
 
-		# case II - light wind 
+		# case II - light wind
 		# wind blows along columns 3-5 from south to north, row reduced by 1
 		if(case == 2):
 			wind = False
@@ -84,6 +107,17 @@ def possibleActions(s, case):
 			# valid only when location is in bounds
 			if(isValid(sp)):
 				A.append(direction)
+			else:
+				if (sp[0] > 6):
+					sp = (6, sp[1])
+				if (sp[0] < 0):
+					sp = (0, sp[1])
+				if (sp[1] > 6):
+					sp = (sp[0], 6)
+				if (sp[1] < 0):
+					sp = (sp[0], 0)
+				#if (isValid(sp)):
+					#A.append(direction)
 			'''
 			# if wind blew us out of map, push us back onto map
 			elif(wind == True):
@@ -104,6 +138,16 @@ def possibleActions(s, case):
 			# valid only when location is in bounds
 			if(isValid(sp)):
 				A.append(direction)
+			else:
+				if (sp[0] > 6):
+					sp = (6, sp[1])
+				if (sp[0] < 0):
+					sp = (0, sp[1])
+				if (sp[1] > 6):
+					sp = (sp[0], 6)
+				if (sp[1] < 0):
+					sp = (sp[0], 0)
+
 			'''
 			# if wind blew us out of map, push us back onto map
 			elif(wind == True):
@@ -131,7 +175,7 @@ def isValid(s):
 	else:
 		return False
 
-if __name__ == "__main__":	
+if __name__ == "__main__":
 	# call value Iteration function for three cases
 	for i in range(1, 4):
 		U = [[0 for x in range(7)] for y in range(7)]
